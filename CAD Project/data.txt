@@ -1,0 +1,14 @@
+// Assembly version of test 0
+0:	lui $1, 0xffff
+1:	lui $2, 0x8000
+2:	lui $3, 0x7fff
+3:	lui $4, 0x5a4b
+4:	lui $5, 0x1e0f
+5:	addi $6, $0, 0x0001
+6:	ori $1, $1, 0xfffe
+7:	ori $3, $3, 0xffff
+8:	ori $4, $4, 0x3c2d
+9:	ori $5, $5, 0xf0e1
+10:	sub $7, $0, $6
+11:	add $1, $1, $6
+12:	ori $8, $2, 0x0800
