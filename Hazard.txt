@@ -1,0 +1,99 @@
+This Verilog code represents a Hazard Detection Unit module. Let's go through it in detail:
+
+The module has the following inputs:
+- `IF_ID_Opcode`: A 6-bit input representing the opcode of the instruction in the IF/ID stage.
+- `IF_ID_Funcode`: A 6-bit input representing the funcode of the instruction in the IF/ID stage.
+- `IF_ID_Rs`: A 5-bit input representing the source register (Rs) of the instruction in the IF/ID stage.
+- `IF_ID_Rt`: A 5-bit input representing the target register (Rt) of the instruction in the IF/ID stage.
+- `ID_EX_MemRead`: A 1-bit input indicating whether the instruction in the ID/EX stage is a memory read operation.
+- `ID_EX_Rt`: A 5-bit input representing the target register (Rt) of the instruction in the ID/EX stage.
+- `equal`: A 1-bit input representing the result of a comparison operation.
+- `ID_EX_Rd`: A 5-bit input representing the destination register (Rd) of the instruction in the ID/EX stage.
+- `EX_MEM_Rd`: A 5-bit input representing the destination register (Rd) of the instruction in the EX/MEM stage.
+- `ID_EX_RegWrite`: A 1-bit input indicating whether the instruction in the ID/EX stage performs a register write operation.
+- `EX_MEM_RegWrite`: A 1-bit input indicating whether the instruction in the EX/MEM stage performs a register write operation.
+
+The module has the following outputs:
+- `PCWrite`: A 1-bit output indicating whether the program counter (PC) should be updated.
+- `ID_EX_CtrlFlush`: A 1-bit output indicating whether the pipeline stages from ID to EX should be flushed.
+- `IF_ID_Flush`: A 1-bit output indicating whether the pipeline stage from IF to ID should be flushed.
+- `IF_ID_Hold`: A 1-bit output indicating whether the pipeline stage from IF to ID should be held.
+
+Inside the module, there are four local parameters defined:
+- `j`, `jal`, `beq`, and `bne` are 6-bit values representing specific opcode values.
+- `R_Type` is a 6-bit value representing the opcode for R-type instructions.
+- `fun_jr` is a 6-bit value representing the funcode for the JR instruction.
+
+The module contains one combinational logic block defined using the `always` statement. This block is sensitive to changes in the inputs `IF_ID_Opcode`, `IF_ID_Rs`, `IF_ID_Rt`, `ID_EX_MemRead`, `ID_EX_Rt`, `equal`, `ID_EX_Rd`, `EX_MEM_Rd`, `ID_EX_RegWrite`, and `EX_MEM_RegWrite`.
+
+The combinational logic block checks various conditions and sets the output signals accordingly. Here's a breakdown of the conditions:
+
+1. If the instruction in the ID/EX stage is a memory read operation (`ID_EX_MemRead == 1'b1`) and either the Rs or Rt register of the instruction in the IF/ID stage matches the Rt register of the ID/EX stage, then:
+   - `PCWrite` is set to 1'b0 (program counter is not updated).
+   - `ID_EX_CtrlFlush` is set to 1'b1 (pipeline stages from ID to EX are flushed).
+   - `IF_ID_Flush` is set to 1'b0 (pipeline stage from IF to ID is not flushed).
+   - `IF_ID_Hold` is set to 1'b1 (pipeline stage from IF to ID is held).
+
+2. If the instruction in the IF/ID stage is a branch instruction (beq or bne) or a JR instruction (opcode is R-type and funcode is fun_jr), and either the Rs or Rt register of the instruction in the IF/ID stage matches the Rd register of the ID/EX stage with register write enabled, or the Rs or Rt register of the instruction in the IF/ID stage matches the Rd register of the EX/MEM stage with register write enabled, then:
+   - `PCWrite` is set to 1'b0 (program counter is not updated).
+   - `ID_EX_CtrlFlush` is set to 1'b1 (pipeline stages from ID to EX are flushed).
+   - `IF_ID_Flush` is set to 1'b0 (pipeline stage from IF to ID is not flushed).
+   - `IF_ID_Hold` is set to 1'b1 (pipeline stage from IF to ID is held).
+
+3. If the instruction in the IF/ID stage is a jump instruction (opcode is j), or a JR instruction (opcode is R-type and funcode is fun_jr), or a beq instruction with the comparison result (`equal`) being 1'b1, or a bne instruction with the comparison result (`equal`) being 1'b0, then:
+   - `PCWrite` is set to 1'b1 (program counter is updated).
+   - `ID_EX_CtrlFlush` is set to 1'b0 (pipeline stages from ID to EX are not flushed).
+   - `IF_ID_Flush` is set to 1'b1 (pipeline stage from IF to ID is flushed).
+   - `IF_ID_Hold` is set to 1'b0 (pipeline stage from IF to ID is not held).
+
+4. If the instruction in the IF/ID stage is a jal instruction, then:
+   - `PCWrite` is set to 1'b1 (program counter is updated).
+   - `ID_EX_CtrlFlush` is set to 1'b0 (pipeline stages from ID to EX are not flushed).
+   - `IF_ID_Flush` is set to 1'b1 (pipeline stage from IF to ID is flushed).
+   - `IF_ID_Hold` is set to 1'b0 (pipeline stage from IF to ID is not held).
+
+5. For all other instructions, the default case:
+   - `PCWrite` is set to 1'b1 (program counter is updated).
+   - `ID_EX_CtrlFlush` is set to 1'b0 (pipeline stages from ID to EX are not flushed).
+   - `IF_ID_Flush` is set to 1'b0 (pipeline stage from IF to ID is not flushed).
+   - `IF_ID_Hold` is set to 1'b0 (pipeline stage from IF to ID is not held).
+
+Overall, this Hazard Detection Unit module is responsible for detecting hazards in the pipeline and generating control signals to handle these hazards. It determines whether the program counter should be updated, whether pipeline stages should be flushed, and whether pipeline stages should be held, based on specific conditions involving the instructions and register dependencies in different stages of the pipeline.
+
+
+
+================================================================================================
+The Hazard Detection Unit is responsible for detecting hazards in the pipeline. Hazards occur when instructions in the pipeline depend on the results of previous instructions that have not yet completed their execution. This can lead to incorrect results or stalls in the pipeline.
+
+In the given Verilog code, the Hazard Detection Unit detects hazards by examining the current instruction in the IF/ID stage and comparing it with the instructions in the ID/EX and EX/MEM stages.
+
+The conditions checked in the combinational logic block include:
+
+1. Memory Read Hazard:
+   - If the instruction in the ID/EX stage is a memory read operation (`ID_EX_MemRead == 1'b1`) and either the Rs or Rt register of the instruction in the IF/ID stage matches the Rt register of the ID/EX stage, a hazard is detected.
+   - In this case, the `PCWrite` signal is set to 1'b0 to prevent updating the program counter.
+   - The `ID_EX_CtrlFlush` signal is set to 1'b1 to flush the pipeline stages from ID to EX.
+   - The `IF_ID_Flush` signal is set to 1'b0 to avoid flushing the pipeline stage from IF to ID (it is not affected by the hazard).
+   - The `IF_ID_Hold` signal is set to 1'b1 to hold the pipeline stage from IF to ID, preventing the next instruction from entering the pipeline.
+
+2. Data Hazard:
+   - If the instruction in the IF/ID stage is a branch instruction (beq or bne) or a JR instruction (opcode is R-type and funcode is fun_jr), and either the Rs or Rt register of the instruction in the IF/ID stage matches the Rd register of the ID/EX stage (which is the destination register of the previous instruction) with register write enabled, or the Rs or Rt register of the instruction in the IF/ID stage matches the Rd register of the EX/MEM stage (which is the destination register of the instruction before the previous one) with register write enabled, a hazard is detected.
+   - In this case, the `PCWrite`, `ID_EX_CtrlFlush`, `IF_ID_Flush`, and `IF_ID_Hold` signals are set in the same way as in the Memory Read Hazard case.
+
+3. Control Hazard:
+   - If the instruction in the IF/ID stage is a jump instruction (opcode is j), or a JR instruction (opcode is R-type and funcode is fun_jr), or a beq instruction with the comparison result (`equal`) being 1'b1, or a bne instruction with the comparison result (`equal`) being 1'b0, a control hazard is detected.
+   - In this case, the `PCWrite` signal is set to 1'b1 to allow updating the program counter.
+   - The `ID_EX_CtrlFlush` signal is set to 1'b0 as control hazards do not require flushing the pipeline stages from ID to EX.
+   - The `IF_ID_Flush` signal is set to 1'b1 to flush the pipeline stage from IF to ID.
+   - The `IF_ID_Hold` signal is set to 1'b0 to allow the next instruction to enter the pipeline.
+
+4. Jump and Link Hazard:
+   - If the instruction in the IF/ID stage is a jal instruction, a jump and link hazard is detected.
+   - In this case, the `PCWrite`, `ID_EX_CtrlFlush`, `IF_ID_Flush`, and `IF_ID_Hold` signals are set in the same way as in the Control Hazard case.
+
+5. No Hazard:
+   - If none of the above conditions are met, it means that there is no hazard.
+   - In this case, the `PCWrite` signal is set to 1'b1 to allow updating the program counter.
+   - The `ID_EX_CtrlFlush`, `IF_ID_Flush`, and `IF_ID_Hold` signals are set to 1'b0, indicating that no pipeline stages need to be flushed or held.
+
+By evaluating these conditions based on the current and previous instructions in the pipeline, the Hazard Detection Unit can accurately detect hazards and generate the necessary control signals to handle them effectively.
