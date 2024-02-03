@@ -1344,10 +1344,10 @@ wire [DATA_WIDTH*REG_DEPTH - 1:0] regvector;
 		registers[0] <= {(DATA_WIDTH){1'b0}};
 	end
 	// $display( "wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[0] , rw  ) ;
+	$display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[0] , 0  ) ;
 	$display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[1] , 1  ) ;
-	$display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[2] , 2  ) ;
-	$display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[3] , 3 ) ;
-	$display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[6] , 6  ) ;
+	$display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[31] , 31 ) ;
+	// $display( "in registerFile wr :%b\twrite data :%h\t data in reg : %h\t rw : %h" , wr, d , registers[6] , 6  ) ;
 
  end
  
